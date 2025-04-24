@@ -6,3 +6,6 @@ streamlit
 keras
 nltk
 textstat
+python-docx
+gensim
+tensorflow
