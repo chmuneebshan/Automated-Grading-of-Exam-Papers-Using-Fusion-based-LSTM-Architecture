@@ -2,3 +2,7 @@ numpy
 pandas
 seaborn
 matplotlib
+streamlit
+keras
+nltk
+textstat
