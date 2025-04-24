@@ -16,12 +16,10 @@ from gensim.corpora import Dictionary
 from tensorflow.keras.models import load_model
 
 import nltk
-nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('averaged_perceptron_tagger')
+nltk.download('all')
 
 # Load models
-model = load_model("Outpus/Model/trained_model.keras")
+model = load_model("Outputs/Model/trained_model.keras")
 word2vec = Word2Vec.load("Outputs/word2vec_model.model")
 lda_model = LdaModel.load("Outputs/lda_model.model")
 lsi_model = LsiModel.load("Outputs/lsi_model.model")
