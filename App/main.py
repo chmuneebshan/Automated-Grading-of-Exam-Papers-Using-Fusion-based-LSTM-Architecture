@@ -145,6 +145,12 @@ def essay_to_vector(text, model):
                for sentence in processed_sentences if sentence]
     return np.mean(vectors, axis=0) if vectors else np.zeros(model.vector_size)
 
+def pad_vector(vec, target_length):
+    vec = np.array(vec)
+    if len(vec) < target_length:
+        return np.pad(vec, (0, target_length - len(vec)))
+    return vec[:target_length]
+
 # --- Streamlit App ---
 st.title("Automated Essay Grading App")
 input_mode = st.radio("Choose input mode", ["Paste Essay", "Upload File (.txt/.docx)"])
@@ -170,14 +176,20 @@ if st.button("Predict Score"):
     else:
         try:
             vocab_feats = {**length_based_features(text), **calculate_pos_features(text), **punctuation_features(text)}
+            vocab_feats['essay_set'] = 7  # adding dummy essay set feature
             readability_feats = {**readability_features(text), **sentence_info_features(text), **word_usage_features(text)}
             sentence_vector = essay_to_vector(text, word2vec).reshape(-1, 1)
             chapter_input = clean_text(text)
             chapter_bow = dictionary.doc2bow(chapter_input)
-            lda_vec = [val[1] for val in lda_model[chapter_bow]]
-            lsi_vec = [val[1] for val in lsi_model[chapter_bow]]
-            doc2vec_vec = doc2vec_model.infer_vector(chapter_input)
-            chapter_feats = np.concatenate([lsi_vec, lda_vec, doc2vec_vec])
+            # lda_vec = [val[1] for val in lda_model[chapter_bow]]
+            # lsi_vec = [val[1] for val in lsi_model[chapter_bow]]
+            # doc2vec_vec = doc2vec_model.infer_vector(chapter_input)
+
+            lda_vec = pad_vector([val[1] for val in lda_model[chapter_bow]], 10)
+            lsi_vec = pad_vector([val[1] for val in lsi_model[chapter_bow]], 10)
+            doc2vec_vec = pad_vector(doc2vec_model.infer_vector(chapter_input), 50)
+            chapter_feats = np.concatenate([lsi_vec, lda_vec, doc2vec_vec, [7]])  # Add dummy essay_id = 0
+
 
             vocab_input = np.array(list(vocab_feats.values())).reshape(1, -1, 1)
             readability_input = np.array(list(readability_feats.values())).reshape(1, -1, 1)
